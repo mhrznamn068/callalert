@@ -15,7 +15,7 @@ sip_server = os.environ.get('SIP_SERVER')
 sip_server_username = os.environ.get('SIP_SERVER_USERNAME')
 sip_server_sshkey = os.environ.get('SIP_SERVER_SSHKEY')
 sip_trunk = os.environ.get('SIP_TRUNK')
-sip_destination_number = [f'{DESTINATION_NUMBER1}']
+sip_destination_number = [os.environ.get('DESTINATION_NUMBER1')]
 sip_recording = os.environ.get('SIP_CALLERID')
 sip_callfile_path = os.environ.get('SIP_CALLFILE_PATH')
 sip_callerid = os.environ.get('SIP_CALLERID')
@@ -80,7 +80,7 @@ def upload_recording(work_dir_parent, timestamp):
     sftp = ssh.open_sftp()
     sftp.put(f"{work_dir_parent}/sounds/alert-{timestamp}.wav", f'/var/lib/asterisk/sounds/alert-{timestamp}.wav')
     sftp.close()
-    command = f'chown -R asterisk:asterisk /var/lib/asterisk/sounds/alert-{timestamp}.wav && && find /var/lib/asterisk/sounds -name "alert-*" -amin +5 -delete -print'
+    command = f'chown -R asterisk:asterisk /var/lib/asterisk/sounds/alert-{timestamp}.wav && chmod 664 /var/lib/asterisk/sounds/alert-{timestamp}.wav && find /var/lib/asterisk/sounds -name "alert-*" -amin +5 -delete -print'
     (stdin, stdout, stderr) = ssh.exec_command(command)
     for line in stdout.readlines():
         print(line)
@@ -102,7 +102,7 @@ def callfile(work_dir_parent, timestamp, destination_number):
     content = f"""Channel: SIP/{sip_trunk}/{destination_number}
 CallerID: {sip_callerid}
 Application: Playback
-Data: {sip_recording}"""
+Data: alert-{timestamp}"""
     f = open(f"{work_dir_parent}/callfile/alert-{timestamp}-{destination_number}.call", "w")
     f.write(content)
     f.close()
