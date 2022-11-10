@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  app:
+    image: mhrznamn068/callalert:latest
+    container_name: callalert
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env
+  
