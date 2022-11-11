@@ -28,23 +28,8 @@ def callalert():
         if request.content_type != 'application/json':
             return Response('Invalid content-type. Must be application/json.', status=415)
 
-        dt = datetime.now()
-        ts = datetime.timestamp(dt)
-        date_time = datetime.fromtimestamp(ts)
-        timestamp = date_time.strftime("%Y_%m_%d-%H_%M_%S")
-
-        work_dir_parent = "/tmp/callalert/"
-        work_dirs = ["/tmp/callalert/sounds", "/tmp/callalert/soundtext", "/tmp/callalert/callfile" ]
-        for wd in work_dirs:
-            Path(wd).mkdir(parents=True, exist_ok=True)
-
-        deltime = arrow.now().shift(minutes=-5) #.shift(days=-1)
-        for files in Path(work_dir_parent).rglob('*'):
-            if files.is_file():
-                itemTime = arrow.get(files.stat().st_mtime)
-                if itemTime < deltime:
-                    os.remove(files)
-
+        timestamp = workdir_init()[0]
+        work_dir_parent = workdir_init()[1]
         data = request.json
 
         trigger_name = data["trigger_name"]
@@ -68,6 +53,63 @@ def callalert():
             status = True,
             message = "Call Alert Successfull"
         )
+
+@app.route('/callalert/prometheus', methods=['POST'])
+def prometheus():
+    if request.method == 'POST':
+        if request.content_type != 'application/json':
+            return Response('Invalid content-type. Must be application/json.', status=415)
+    
+        timestamp = workdir_init()[0]
+        work_dir_parent = workdir_init()[1]
+        print(timestamp)
+        print(work_dir_parent)
+        data = request.json
+
+        item_dict = data
+        trigger_len = len(item_dict['alerts'])
+        trigger_job = ""
+        for n in range(trigger_len):
+            trigger_name = item_dict["alerts"][n]["labels"]["alertname"]
+            trigger_severity = item_dict["alerts"][n]["labels"]["severity"]
+            trigger_job_item = item_dict["alerts"][n]["labels"]["job"]
+            #trigger_name = data["alerts"][0]["labels"]["alertname"]
+            #trigger_severity = data["alerts"][0]["labels"]["severity"]
+            trigger_job = f'{trigger_job} and {trigger_job_item}' if trigger_job else trigger_job_item
+
+        alert_text = f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered in {trigger_job}, {trigger_severity} Severity"
+        f = open(f"{work_dir_parent}/soundtext/alert-{timestamp}.txt", "w")
+        f.write(alert_text)
+        f.close()
+
+        gen_recording(timestamp, trigger_name, trigger_severity)
+        upload_recording(work_dir_parent, timestamp)
+
+        for n in sip_destination_number:
+            callfile(work_dir_parent, timestamp, n)
+            upload_callfile(work_dir_parent, timestamp, n)
+
+        return jsonify(
+            status = True,
+            message = "Call Alert Successfull"
+        )
+
+def workdir_init():
+    dt = datetime.now()
+    ts = datetime.timestamp(dt)
+    date_time = datetime.fromtimestamp(ts)
+    timestamp = date_time.strftime("%Y_%m_%d-%H_%M_%S")
+    work_dir_parent = "/tmp/callalert/"
+    work_dirs = ["/tmp/callalert/sounds", "/tmp/callalert/soundtext", "/tmp/callalert/callfile" ]
+    for wd in work_dirs:
+        Path(wd).mkdir(parents=True, exist_ok=True)
+    deltime = arrow.now().shift(minutes=-5) #.shift(days=-1)
+    for files in Path(work_dir_parent).rglob('*'):
+        if files.is_file():
+            itemTime = arrow.get(files.stat().st_mtime)
+            if itemTime < deltime:
+                os.remove(files)
+    return(timestamp,work_dir_parent)
 
 def upload_recording(work_dir_parent, timestamp):
     try:
