@@ -66,7 +66,7 @@ def callalert():
 
         return jsonify(
             status = True,
-            message = "Call Alert Successfull"
+            message = f"Call Alert Successfull - Call Message: {alert_text}"
         )
 
 def upload_recording(work_dir_parent, timestamp):
