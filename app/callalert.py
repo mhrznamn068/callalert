@@ -37,6 +37,7 @@ def callalert():
 
         #print(f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered, {trigger_severity} Severity")
         alert_text = f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered, {trigger_severity} Severity"
+        print(alert_text)
         f = open(f"{work_dir_parent}/soundtext/alert-{timestamp}.txt", "w")
         f.write(alert_text)
         f.close()
@@ -78,6 +79,7 @@ def prometheus():
             trigger_job = f'{trigger_job} and {trigger_job_item}' if trigger_job else trigger_job_item
 
         alert_text = f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered in {trigger_job}, {trigger_severity} Severity"
+        print(alert_text)
         f = open(f"{work_dir_parent}/soundtext/alert-{timestamp}.txt", "w")
         f.write(alert_text)
         f.close()
@@ -91,7 +93,7 @@ def prometheus():
 
         return jsonify(
             status = True,
-            message = "Call Alert Successfull"
+            message = f"Call Alert Successfull - Call Message: {alert_text}"
         )
 
 def workdir_init():
