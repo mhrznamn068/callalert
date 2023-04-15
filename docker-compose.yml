@@ -20,14 +20,6 @@ services:
       - asterisk_config:/etc/asterisk
       - asterisk_data:/var/lib/asterisk
       - asterisk_spool:/var/spool/asterisk
-    ports:
-      - 5060:5060/udp
-      - 5060:5060/tcp
-      - 5065:5065/udp
-      - 5065:5065/tcp
-      - 10000-10099:10000-10099/udp
-      - 8088:8088
-      - 8089:8089
 
 volumes:
   asterisk_config:
