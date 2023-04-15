@@ -9,7 +9,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - asterisk_data:/var/lib/asterisk"
+      - asterisk_data:/var/lib/asterisk
       - asterisk_spool:/var/spool/asterisk
   
   asterisk:
@@ -17,9 +17,9 @@ services:
     image: asterisk:18
     container_name: asterisk
     volumes:
-      - asterisk_config:/etc/asterisk"
-      - asterisk_data:/var/lib/asterisk"
-      - asterisk_spool:/var/spool/asterisk"
+      - asterisk_config:/etc/asterisk
+      - asterisk_data:/var/lib/asterisk
+      - asterisk_spool:/var/spool/asterisk
     ports:
       - 5060:5060/udp
       - 5060:5060/tcp
