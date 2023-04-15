@@ -1,4 +1,8 @@
 #!/bin/bash
+
+[ -d "/tmp/alertcall/soundtext" ] && echo "Directory /tmp/alertcall/soundtext exists." || mkdir -p /tmp/alertcall/soundtext
+find /tmp/alertcall -mtime +1 -delete -print
+
 cat <<EOT > /tmp/alertcall/soundtext/alert.txt
 {TRIGGER.NAME}
 {TRIGGER.SEVERITY}
