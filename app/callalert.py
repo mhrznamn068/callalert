@@ -9,6 +9,8 @@ from pathlib import Path
 import arrow
 from recordgen import *
 import paramiko
+import shutil
+import subprocess
 
 ORG_NAME = os.environ.get('ORG_NAME')
 sip_server = os.environ.get('SIP_SERVER')
@@ -114,33 +116,16 @@ def workdir_init():
     return(timestamp,work_dir_parent)
 
 def upload_recording(work_dir_parent, timestamp):
-    try:
-      ssh = paramiko.SSHClient()
-      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(sip_server, username=sip_server_username, key_filename=sip_server_sshkey)
-    except paramiko.ssh_exception.AuthenticationException:
-        print('SIP server Authentication Error')
-        sys.exit()
-    sftp = ssh.open_sftp()
-    sftp.put(f"{work_dir_parent}/sounds/alert-{timestamp}.wav", f'/var/lib/asterisk/sounds/alert-{timestamp}.wav')
-    sftp.close()
-    command = f'chown -R asterisk:asterisk /var/lib/asterisk/sounds/alert-{timestamp}.wav && chmod 664 /var/lib/asterisk/sounds/alert-{timestamp}.wav && find /var/lib/asterisk/sounds -name "alert-*" -amin +5 -delete -print'
-    (stdin, stdout, stderr) = ssh.exec_command(command)
-    for line in stdout.readlines():
-        print(line)
-    ssh.close()
+    src_path = work_dir_parent + "/sounds/alert-" + timestamp + ".wav"
+    dest_path = "/var/lib/asterisk/sounds/alert-" + timestamp + ".wav"
+    shutil.copy(src_path, dest_path)
+    subprocess.run(['chown', 'asterisk:asterisk', dest_path])
+    subprocess.run(['chmod', '0664', dest_path])
 
 def upload_callfile(work_dir_parent, timestamp, destination_number):
-    try:
-      ssh = paramiko.SSHClient()
-      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(sip_server, username=sip_server_username, key_filename=sip_server_sshkey)
-    except paramiko.ssh_exception.AuthenticationException:
-        print('SIP server Authentication Error')
-        sys.exit()
-    sftp = ssh.open_sftp()
-    sftp.put(f"{work_dir_parent}/callfile/alert-{timestamp}-{destination_number}.call", f'{sip_callfile_path}/alert-{timestamp}-{destination_number}.call')
-    sftp.close()
+    src_path = work_dir_parent + "/callfile/alert-" + timestamp + "-" + destination_number + ".call"
+    dest_path = sip_callfile_path + "/alert-" + timestamp + "-" + destination_number + ".call"
+    shutil.copy(src_path, dest_path)
     
 def callfile(work_dir_parent, timestamp, destination_number):
     content = f"""Channel: SIP/{sip_trunk}/{destination_number}
