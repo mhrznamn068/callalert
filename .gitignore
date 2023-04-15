@@ -1,3 +1,5 @@
 .env
 .devcontainer
 __pycache__
+alert-demo.wav
+sip.conf.local
