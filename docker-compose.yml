@@ -8,7 +8,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - /root/.ssh/id_rsa_zabbix:/root/.ssh/id_rsa_zabbix:ro
+      - ${LOCAL_KEY_PATH}:/root/.ssh/id_rsa_zabbix:ro
 
   nginx:
     image: nginx

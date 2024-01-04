@@ -1,5 +1,0 @@
-{
-  "trigger_name": "Test Alert",
-  "trigger_severity": "High",
-  "destination_number": "9810142252"
-}

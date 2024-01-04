@@ -2,7 +2,7 @@ CALLALERT_URL="http://localhost:5000/callalert"
 PROMETHUES_CALLALERT_URL="http://localhost:5000//callalert/prometheus"
 TRIGGER_NAME="Test Alert"
 TRIGGER_SEVERITY="High"
-destination_number="9810142252"
+destination_number=""
 
 generate_post_data()
 {
