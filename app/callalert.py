@@ -34,6 +34,7 @@ def callalert():
 
         trigger_name = data["trigger_name"]
         trigger_severity = data["trigger_severity"]
+        destination_number = data["destination_number"].split(',')
 
         #print(f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered, {trigger_severity} Severity")
         alert_text = f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered, {trigger_severity} Severity"
@@ -46,7 +47,7 @@ def callalert():
 
         upload_recording(work_dir_parent, timestamp)
 
-        for n in sip_destination_number:
+        for n in destination_number:
             callfile(work_dir_parent, timestamp, n)
             upload_callfile(work_dir_parent, timestamp, n)
 
@@ -78,6 +79,8 @@ def prometheus():
             #trigger_severity = data["alerts"][0]["labels"]["severity"]
             trigger_job = f'{trigger_job} and {trigger_job_item}' if trigger_job else trigger_job_item
 
+        destination_number = data["destination_number"].split(',')
+
         alert_text = f"{ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered in {trigger_job}, {trigger_severity} Severity"
         print(alert_text)
         f = open(f"{work_dir_parent}/soundtext/alert-{timestamp}.txt", "w")
@@ -87,7 +90,7 @@ def prometheus():
         gen_recording(timestamp, trigger_name, trigger_severity)
         upload_recording(work_dir_parent, timestamp)
 
-        for n in sip_destination_number:
+        for n in destination_number:
             callfile(work_dir_parent, timestamp, n)
             upload_callfile(work_dir_parent, timestamp, n)
 

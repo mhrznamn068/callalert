@@ -7,4 +7,14 @@ services:
       - 5000:5000
     env_file:
       - ./.env
-  
+    volumes:
+      - /root/.ssh/id_rsa_zabbix:/root/.ssh/id_rsa_zabbix:ro
+
+  nginx:
+    image: nginx
+    ports:
+      - 5080:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
