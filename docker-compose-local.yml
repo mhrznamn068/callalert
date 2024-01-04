@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mhrznamn068/callalert:local
+    container_name: callalert
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env
+    volumes:
+      - ${LOCAL_KEY_PATH}:/root/.ssh/id_rsa
+  
