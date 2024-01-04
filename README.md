@@ -2,6 +2,11 @@
 
 ## Zabbix Action
 
+### Run
+```
+docker-compose up -d
+```
+
 ### Execute Command
 ```
 #!/bin/bash
