@@ -9,3 +9,4 @@ services:
       - ./.env
     volumes:
       - ./djangoapp:/app
+      - ${LOCAL_KEY_PATH}:/app/.ssh/id_rsa

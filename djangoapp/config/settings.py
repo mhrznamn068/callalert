@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,3 +123,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ORG_NAME = os.environ.get("ORG_NAME")
+SIP_SERVER = os.environ.get("SIP_SERVER")
+SIP_SERVER_USERNAME = os.environ.get("SIP_SERVER_USERNAME")
+SIP_SERVER_SSHKEY = os.environ.get("SIP_SERVER_SSHKEY")
+SIP_TRUNK = os.environ.get("SIP_TRUNK")
+SIP_DESTINATION_NUMBER = os.environ.get("SIP_DESTINATION_NUMBER")
+SIP_RECORDING = os.environ.get("SIP_RECORDING")
+SIP_CALLFILE_PATH = os.environ.get("SIP_CALLFILE_PATH")
+SIP_CALLERID = os.environ.get("SIP_CALLERID")
