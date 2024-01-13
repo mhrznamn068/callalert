@@ -2,29 +2,10 @@ version: '3.7'
 services:
   app:
     build: .
-    image: callalert
-    container_name: callalert
+    image: callalert-django
     ports:
-      - 5000:5000
+      - 4000:4000
     env_file:
       - ./.env
     volumes:
-      - asterisk_data:/var/lib/asterisk
-      - asterisk_spool:/var/spool/asterisk
-  
-  asterisk:
-    build: ./asterisk
-    image: asterisk:18
-    container_name: asterisk
-    volumes:
-      - asterisk_config:/etc/asterisk
-      - asterisk_data:/var/lib/asterisk
-      - asterisk_spool:/var/spool/asterisk
-
-volumes:
-  asterisk_config:
-    name: asterisk_config
-  asterisk_data:
-    name: asterisk_data
-  asterisk_spool:
-    name: asterisk_spool
+      - ./djangoapp:/app

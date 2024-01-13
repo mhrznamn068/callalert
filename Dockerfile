@@ -2,18 +2,19 @@ FROM python:3.10.8-alpine3.16
 
 LABEL maintainer="Aman Maharjan<mhrznamn068@gmail.com>"
 
-ENV USER=asterisk
+ENV USER=app
 
 WORKDIR /app
 
 COPY ./requirements.txt .
 
-RUN pip install -r ./requirements.txt
+RUN adduser -D ${USER} \
+    && pip install -r ./requirements.txt
 
-COPY ./app .
+COPY ./djangoapp .
 
 RUN chown -R $USER: .
 
 USER $USER
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:4000"]
