@@ -56,46 +56,47 @@ def call(request):
     gen_recording(timestamp, trigger_name, trigger_severity)
     upload_recording(work_dir_parent, timestamp)
 
+    response_data = []
+
     if destination_numbers is not None:
-      for number in destination_numbers:
-        try:
-            user_profile = UserProfile.objects.get(mobile_number=number)
-            current_user = user_profile.user
-            current_user_print = f'Current user is {current_user}'
-            print(current_user_print)
-        except UserProfile.DoesNotExist:
-            logging.error(f"UserProfile not found for mobile number: {number}")
-            return JsonResponse({"status": False, "message": "User not found."})
+        for number in destination_numbers:
+            try:
+                user_profile = UserProfile.objects.get(mobile_number=number)
+                current_user = user_profile.user
+            except UserProfile.DoesNotExist:
+                logging.error(f"UserProfile not found for mobile number: {number}")
+                response_data.append({"status": False, "message": f"User {current_user} not found."})
+                continue
     
-        try:
-          on_call_duty = OnCallDuty.objects.get(user=current_user)
-          on_call_duty_print = f'On Call Duty: {on_call_duty}'
-          print(on_call_duty_print)
-        except OnCallDuty.DoesNotExist:
-            logging.error(f"OnCallDuty instance not found for user: {current_user.username}")
-            return JsonResponse({"status": False, "message": "User is not on duty."})
+            try:
+              on_call_duty = OnCallDuty.objects.get(user=current_user)
+            except OnCallDuty.DoesNotExist:
+                logging.error(f"OnCallDuty instance not found for user: {current_user.username}")
+                response_data.append({"status": False, "message": f"User {current_user} is not on duty."})
+                continue
     
-        if on_call_duty.duty:
-          callfile(work_dir_parent, timestamp, number)
-          upload_callfile(work_dir_parent, timestamp, number)
+            if on_call_duty.duty:
+                callfile(work_dir_parent, timestamp, number)
+                upload_callfile(work_dir_parent, timestamp, number)
 
-          # Save alert history to the database
-          alerthistory.objects.create(
-              trigger_name=f'{timestamp}-{trigger_name}',
-              trigger_severity=trigger_severity,
-              destination_number=",".join(destination_numbers),
-              #timestamp=timestamp,
-              call_source=request.resolver_match.url_name,
-          )
+                # Save alert history to the database
+                alerthistory.objects.create(
+                    trigger_name=f'{timestamp}-{trigger_name}',
+                    trigger_severity=trigger_severity,
+                    destination_number=",".join(destination_numbers),
+                    #timestamp=timestamp,
+                    call_source=request.resolver_match.url_name,
+                )
+                response_data.append({"status": True, "message": f"User {current_user} is on duty, Sending Call Alerts"})
+            else:
+                response_data.append({"status": False, "message": f"User {current_user} is not on duty."})
 
-          return JsonResponse(
-              {
-                  "status": True,
-                  "message": f"Call Alert Successful - Call Message: {alert_text}",
-              }
-          )
-        else:
-            return JsonResponse({"status": False, "message": "User is not on duty."})
+    return JsonResponse(
+        {
+            "status": True,
+            "message": f"Call Alert Successful - Call Message: {alert_text} - Destination Number: {number}",
+        }
+    )
 
 @csrf_exempt
 @require_POST
