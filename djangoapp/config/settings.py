@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'callalert.apps.CallalertConfig',
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
@@ -123,6 +124,29 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "CallAlert Admin",
+    "site_header": "CallAlert",
+    "welcome_sign": "Welcome to the CallAlert Admin",
+    "site_brand": "CallAlert",
+    "topmenu_links": [
+        {
+            "name": "Home",
+            "url": "admin:index",
+        },
+        {
+            "name": "View Site",
+            "url": "http://localhost:4000/",
+            "new_window": True,
+        },
+        {
+            "name": "GitHub Repo",
+            "url": "https://github.dev/mhrznamn068/callalert/",
+            "new_window": True,
+        },
+    ],
+}
 
 ORG_NAME = os.environ.get("ORG_NAME")
 SIP_SERVER = os.environ.get("SIP_SERVER")

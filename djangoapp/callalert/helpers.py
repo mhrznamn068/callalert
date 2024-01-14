@@ -61,10 +61,6 @@ def upload_callfile(work_dir_parent, timestamp, destination_number):
         print('SIP server Authentication Error')
         sys.exit()
     sftp = ssh.open_sftp()
-    callfile = f"{work_dir_parent}callfile/alert-{timestamp}-{destination_number}.call"
-    print(callfile)
-    callfile_dst_path = f'{SIP_CALLFILE_PATH}alert-{timestamp}-{destination_number}.call'
-    print(callfile_dst_path)
     sftp.put(f"{work_dir_parent}callfile/alert-{timestamp}-{destination_number}.call", f'/var/spool/asterisk/tmp/alert-{timestamp}-{destination_number}.call')
     ssh.exec_command(f'mv /var/spool/asterisk/tmp/alert-{timestamp}-{destination_number}.call /var/spool/asterisk/outgoing/alert-{timestamp}-{destination_number}.call')
     sftp.close()

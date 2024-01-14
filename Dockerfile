@@ -6,7 +6,7 @@ ENV USER=app
 
 WORKDIR /app
 
-COPY ./requirements.txt .
+COPY ./djangoapp/requirements.txt .
 
 RUN adduser -D ${USER} \
     && pip install -r ./requirements.txt

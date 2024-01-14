@@ -10,7 +10,6 @@ import json
 from datetime import datetime
 from pathlib import Path
 import arrow
-import logging
 
 ORG_NAME = settings.ORG_NAME
 
@@ -18,10 +17,19 @@ def get_mobile_numbers(group_name):
     try:
         escalation_group = get_object_or_404(EscalationUserGroup, name=group_name)
         user_profiles = UserProfile.objects.filter(escalation_user_group=escalation_group)
+
         mobile_numbers = [profile.mobile_number for profile in user_profiles if profile.mobile_number]
-        return mobile_numbers
+
+        return JsonResponse({
+            'status': True,
+            'group_name': group_name,
+            'mobile_numbers': mobile_numbers,
+        })
     except EscalationUserGroup.DoesNotExist:
-        return None
+        return JsonResponse({
+            'status': False,
+            'message': f"EscalationUserGroup with name '{group_name}' does not exist.",
+        })
 
 @csrf_exempt
 @require_POST
@@ -38,14 +46,13 @@ def call(request):
         data = json.loads(request.body.decode('utf-8'))
     except json.JSONDecodeError:
         return HttpResponse('Invalid JSON data.', status=400)
-    
-    trigger_name = data.get("trigger_name")
-    trigger_severity = data.get("trigger_severity")
-    call_destination_group = data.get("call_destination_group")
-    destination_numbers = get_mobile_numbers(call_destination_group)
 
     timestamp = workdir_init()[0]
     work_dir_parent = workdir_init()[1]
+
+    trigger_name = data.get("trigger_name")
+    trigger_severity = data.get("trigger_severity")
+    destination_number = data.get("destination_number", "").split(',')
 
     alert_text = f"{settings.ORG_NAME} System Alert, Attention Required, {trigger_name} alert triggered, {trigger_severity} Severity"
 
@@ -56,46 +63,25 @@ def call(request):
     gen_recording(timestamp, trigger_name, trigger_severity)
     upload_recording(work_dir_parent, timestamp)
 
-    if destination_numbers is not None:
-      for number in destination_numbers:
-        try:
-            user_profile = UserProfile.objects.get(mobile_number=number)
-            current_user = user_profile.user
-            current_user_print = f'Current user is {current_user}'
-            print(current_user_print)
-        except UserProfile.DoesNotExist:
-            logging.error(f"UserProfile not found for mobile number: {number}")
-            return JsonResponse({"status": False, "message": "User not found."})
-    
-        try:
-          on_call_duty = OnCallDuty.objects.get(user=current_user)
-          on_call_duty_print = f'On Call Duty: {on_call_duty}'
-          print(on_call_duty_print)
-        except OnCallDuty.DoesNotExist:
-            logging.error(f"OnCallDuty instance not found for user: {current_user.username}")
-            return JsonResponse({"status": False, "message": "User is not on duty."})
-    
-        if on_call_duty.duty:
-          callfile(work_dir_parent, timestamp, number)
-          upload_callfile(work_dir_parent, timestamp, number)
+    for n in destination_number:
+        callfile(work_dir_parent, timestamp, n)
+        upload_callfile(work_dir_parent, timestamp, n)
 
-          # Save alert history to the database
-          alerthistory.objects.create(
-              trigger_name=f'{timestamp}-{trigger_name}',
-              trigger_severity=trigger_severity,
-              destination_number=",".join(destination_numbers),
-              #timestamp=timestamp,
-              call_source=request.resolver_match.url_name,
-          )
+    # Save alert history to the database
+    alerthistory.objects.create(
+        trigger_name=f'{timestamp}-{trigger_name}',
+        trigger_severity=trigger_severity,
+        destination_number=','.join(destination_number),
+        #timestamp=timestamp,
+        call_source=request.resolver_match.url_name,
+    )
 
-          return JsonResponse(
-              {
-                  "status": True,
-                  "message": f"Call Alert Successful - Call Message: {alert_text}",
-              }
-          )
-        else:
-            return JsonResponse({"status": False, "message": "User is not on duty."})
+    return JsonResponse(
+        {
+            "status": True,
+            "message": f"Call Alert Successful - Call Message: {alert_text}",
+        }
+    )
 
 @csrf_exempt
 @require_POST

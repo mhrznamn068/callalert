@@ -1,0 +1,23 @@
+[
+    {
+        "model": "callalert.escalationusergroup",
+        "pk": 1,
+        "fields": {
+            "name": "SRE"
+        }
+    },
+    {
+        "model": "callalert.escalationusergroup",
+        "pk": 2,
+        "fields": {
+            "name": "TeamLeads"
+        }
+    },
+    {
+        "model": "callalert.escalationusergroup",
+        "pk": 3,
+        "fields": {
+            "name": "Managers"
+        }
+    }
+]
